@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>DARPA Experimental Paranormal Signal Scanner</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h1>DARPA Experimental Paranormal Signal Scanner</h1>
+<p class="status">SYSTEM STATUS: SCANNING...</p>
+
+
+<!-- RADAR -->
+
+<div id="radar">
+
+<div class="radar-grid"></div>
+
+<div class="scan"></div>
+
+</div>
+
+
+<!-- SIGNAL GRAPH -->
+
+<canvas id="chart"></canvas>
+
+
+<!-- SIGNAL BAR -->
+
+<div class="meter">
+<div id="bar"></div>
+</div>
+
+
+<!-- DATA -->
+
+<p id="signal">EM Signal: 0</p>
+<p id="audioLevel">EVP Noise: 0</p>
+<p id="distance">Spirit Distance: --</p>
+<p id="message">System Idle</p>
+
+<div id="aiMessage">Spirit Message: ---</div>
+
+
+<!-- TERMINAL LOGS -->
+
+<div id="logs"></div>
+
+
+<!-- CAMERA -->
+
+<div class="camera-container">
+
+<video id="camera" autoplay></video>
+
+<img id="ghostOverlay" src="ghost.png">
+
+</div>
+
+
+<!-- BUTTON -->
+
+<button id="startBtn">Start Investigation</button>
+
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
+
