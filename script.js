@@ -1,26 +1,29 @@
-let radar = document.getElementById("radar")
-let signal = document.getElementById("signal")
-let audioLevel = document.getElementById("audioLevel")
-let distance = document.getElementById("distance")
-let message = document.getElementById("message")
-let aiMessage = document.getElementById("aiMessage")
-let bar = document.getElementById("bar")
-let startBtn = document.getElementById("startBtn")
-let camera = document.getElementById("camera")
-let ghostOverlay = document.getElementById("ghostOverlay")
-let logs = document.getElementById("logs")
+const radar = document.getElementById("radar")
+const signal = document.getElementById("signal")
+const audioLevel = document.getElementById("audioLevel")
+const distance = document.getElementById("distance")
+const message = document.getElementById("message")
+const aiMessage = document.getElementById("aiMessage")
+const bar = document.getElementById("bar")
+const startBtn = document.getElementById("startBtn")
+const camera = document.getElementById("camera")
+const ghostOverlay = document.getElementById("ghostOverlay")
+const logs = document.getElementById("logs")
 
 let scanRunning = false
+let ringsCreated = false
 
-// sounds
+/* SOUNDS */
+
 const radarSound = new Audio("radar.mp3")
 const ghostSound = new Audio("ghost.mp3")
 
 radarSound.loop = true
 radarSound.volume = 0.2
-ghostSound.volume = 0.4
+ghostSound.volume = 0.5
 
-// messages
+/* SPIRIT MESSAGES */
+
 const spiritMessages = [
 "I AM HERE",
 "DO YOU HEAR ME",
@@ -35,22 +38,29 @@ const spiritMessages = [
 "BE CAREFUL"
 ]
 
-// system log
+/* TERMINAL LOG */
+
 function log(msg){
 
-let line = document.createElement("div")
-line.innerText = "> " + msg
+const line = document.createElement("div")
+line.textContent = "> " + msg
 
 logs.prepend(line)
 
+while(logs.children.length > 15){
+logs.removeChild(logs.lastChild)
 }
 
-// boot
+}
+
+/* SYSTEM BOOT */
+
 log("SYSTEM BOOT")
 log("RADAR MODULE READY")
 log("EVP CHANNEL INITIALIZED")
 
-// start scan
+/* START BUTTON */
+
 startBtn.onclick = () => {
 
 if(scanRunning) return
@@ -59,9 +69,12 @@ scanRunning = true
 
 log("SCAN STARTED")
 
-radarSound.play()
+radarSound.play().catch(()=>{})
 
+if(!ringsCreated){
 createRadarRings()
+ringsCreated = true
+}
 
 startScan()
 startCamera()
@@ -69,18 +82,19 @@ startEVP()
 
 }
 
-// main scan loop
+/* MAIN SCAN */
+
 function startScan(){
 
 let previous = 0
 
 setInterval(()=>{
 
-let raw = Math.random()*100
-let em = (raw + previous)/2
+const raw = Math.random()*100
+const em = (raw + previous)/2
 previous = em
 
-signal.innerText = "EM Signal: " + em.toFixed(2)
+signal.textContent = "EM Signal: " + em.toFixed(2)
 
 bar.style.width = em + "%"
 
@@ -88,29 +102,29 @@ ghostAppearance()
 
 if(em > 70){
 
-message.innerText="⚠ Paranormal Activity Detected"
+message.textContent="⚠ Paranormal Activity Detected"
 
 log("EM SPIKE DETECTED")
 
 createTrackedEntity()
 
-let msg = generateSpiritMessage()
+const msg = generateSpiritMessage()
 
 ghostSound.currentTime = 0
-ghostSound.play()
+ghostSound.play().catch(()=>{})
 
 speakSpirit(msg)
 
-let d = (Math.random()*5).toFixed(2)
+const d = (Math.random()*5).toFixed(2)
 
-distance.innerText="Spirit Distance: "+d+" meters"
+distance.textContent="Spirit Distance: "+d+" meters"
 
 log("ENTITY DETECTED AT "+d+"m")
 
 }else{
 
-message.innerText="Area Stable"
-distance.innerText="Spirit Distance: --"
+message.textContent="Area Stable"
+distance.textContent="Spirit Distance: --"
 
 }
 
@@ -118,12 +132,13 @@ distance.innerText="Spirit Distance: --"
 
 }
 
-// radar rings
+/* RADAR RINGS */
+
 function createRadarRings(){
 
 for(let i=1;i<=3;i++){
 
-let ring=document.createElement("div")
+const ring=document.createElement("div")
 
 ring.className="radar-ring"
 
@@ -140,23 +155,24 @@ radar.appendChild(ring)
 
 }
 
-// radar entity tracking
+/* RADAR ENTITY */
+
 function createTrackedEntity(){
 
-let entity = document.createElement("div")
+const entity = document.createElement("div")
 entity.className="blip"
 
-let x = Math.random()*280
-let y = Math.random()*280
+let x = Math.random()*260
+let y = Math.random()*260
 
 entity.style.left=x+"px"
 entity.style.top=y+"px"
 
 radar.appendChild(entity)
 
-let trailInterval=setInterval(()=>{
+const trailInterval=setInterval(()=>{
 
-let trail=document.createElement("div")
+const trail=document.createElement("div")
 trail.className="trail"
 
 trail.style.left=x+"px"
@@ -181,31 +197,98 @@ entity.remove()
 
 }
 
-// message generator
+/* MESSAGE GENERATOR */
+
 function generateSpiritMessage(){
 
-let msg=spiritMessages[Math.floor(Math.random()*spiritMessages.length)]
+const msg = spiritMessages[Math.floor(Math.random()*spiritMessages.length)]
 
-aiMessage.innerText="Spirit Message: "+msg
+aiMessage.textContent = "Spirit Message: " + msg
 
 return msg
 
 }
 
-// voice synthesis
-function speakSpirit(msg){
+/* VOICE SYNTHESIS */
 
-let speech=new SpeechSynthesisUtterance(msg)
+let voices = []
 
-speech.pitch=0.6
-speech.rate=0.85
-speech.volume=1
+function loadVoices(){
+voices = speechSynthesis.getVoices()
+}
 
-speechSynthesis.speak(speech)
+speechSynthesis.onvoiceschanged = loadVoices
+
+/* radio static layer */
+function playStatic(){
+
+const ctx = new AudioContext()
+
+const bufferSize = 2 * ctx.sampleRate
+const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate)
+
+const output = noiseBuffer.getChannelData(0)
+
+for (let i = 0; i < bufferSize; i++) {
+output[i] = Math.random() * 2 - 1
+}
+
+const whiteNoise = ctx.createBufferSource()
+whiteNoise.buffer = noiseBuffer
+
+const gain = ctx.createGain()
+gain.gain.value = 0.02
+
+whiteNoise.connect(gain)
+gain.connect(ctx.destination)
+
+whiteNoise.start()
+
+setTimeout(()=>{
+whiteNoise.stop()
+},600)
 
 }
 
-// ghost camera overlay
+function speakSpirit(msg){
+
+/* radio static before voice */
+playStatic()
+
+/* main female voice */
+const speech = new SpeechSynthesisUtterance(msg)
+
+speech.pitch = 0.2
+speech.rate = 0.55
+speech.volume = 1
+
+const femaleVoice =
+voices.find(v => v.name.toLowerCase().includes("female")) ||
+voices.find(v => v.name.includes("Google UK English Female")) ||
+voices.find(v => v.name.includes("Samantha")) ||
+voices.find(v => v.lang.includes("en"))
+
+if(femaleVoice) speech.voice = femaleVoice
+
+speechSynthesis.speak(speech)
+
+/* whisper layer */
+const whisper = new SpeechSynthesisUtterance(msg)
+
+whisper.pitch = 0.05
+whisper.rate = 0.45
+whisper.volume = 0.35
+
+if(femaleVoice) whisper.voice = femaleVoice
+
+setTimeout(()=>{
+speechSynthesis.speak(whisper)
+},180)
+
+}
+
+/* GHOST OVERLAY */
+
 function ghostAppearance(){
 
 if(Math.random()<0.08){
@@ -220,14 +303,15 @@ ghostOverlay.style.opacity=0
 
 }
 
-// camera
+/* CAMERA */
+
 async function startCamera(){
 
 try{
 
-let stream=await navigator.mediaDevices.getUserMedia({video:true})
+const stream = await navigator.mediaDevices.getUserMedia({video:true})
 
-camera.srcObject=stream
+camera.srcObject = stream
 
 camera.style.filter="brightness(1.4) contrast(1.3) hue-rotate(90deg)"
 
@@ -241,32 +325,33 @@ log("CAMERA BLOCKED")
 
 }
 
-// EVP scanner
+/* EVP SCANNER */
+
 async function startEVP(){
 
 try{
 
-let stream=await navigator.mediaDevices.getUserMedia({audio:true})
+const stream = await navigator.mediaDevices.getUserMedia({audio:true})
 
-let audioContext=new AudioContext()
+const audioContext=new AudioContext()
 
-let mic=audioContext.createMediaStreamSource(stream)
+const mic=audioContext.createMediaStreamSource(stream)
 
-let analyser=audioContext.createAnalyser()
+const analyser=audioContext.createAnalyser()
 
 mic.connect(analyser)
 
 analyser.fftSize=256
 
-let data=new Uint8Array(analyser.frequencyBinCount)
+const data=new Uint8Array(analyser.frequencyBinCount)
 
 setInterval(()=>{
 
 analyser.getByteFrequencyData(data)
 
-let avg=data.reduce((a,b)=>a+b)/data.length
+const avg=data.reduce((a,b)=>a+b)/data.length
 
-audioLevel.innerText="EVP Noise: "+avg.toFixed(2)
+audioLevel.textContent="EVP Noise: "+avg.toFixed(2)
 
 if(avg > 60){
 log("EVP SPIKE DETECTED")
@@ -276,7 +361,7 @@ log("EVP SPIKE DETECTED")
 
 }catch{
 
-audioLevel.innerText="Mic access denied"
+audioLevel.textContent="Mic access denied"
 
 log("MIC BLOCKED")
 
