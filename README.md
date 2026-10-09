@@ -8,4 +8,3 @@ The project is built entirely using HTML, CSS, and JavaScript without external f
 
 Key features include radar-based entity visualization, EM signal simulation with smoothing filters, EVP noise monitoring from microphone input, night-vision styled camera feed, terminal-style activity logs, ghost overlay visual simulation, and text-to-speech based spirit message output.
 
-This project focuses on creative system design, real-time UI rendering, and sensor-based interaction in the browser environment. It serves as an experimental visualization interface rather than a scientific paranormal detection tool.
